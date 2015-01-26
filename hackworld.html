@@ -1,0 +1,1157 @@
+<!doctype html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+    	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Hack World</title>
+        <link href="hackworld.css" rel="stylesheet" type="text/css">
+        <script type="text/javascript" src="pixi.dev.js"></script>
+        <script type="text/javascript" src="jquery-2.1.1.js"></script>
+        <!--<script type="text/javascript" src="toolkit.js"></script>
+        <script type="text/javascript" src="hackworld.js"></script> -->
+        <script type="text/javascript" src="phaser.js"></script>
+    </head>
+    <body>
+        <!--<p id="temptitle">ABC</p>-->
+        <div id="scene"></div>
+    </body>
+    <!-- <script type="text/javascript" src="hackworld.js">
+    </script> -->
+    <!-- -->
+    <script type="text/javascript">
+        
+        /*
+        var screen_size = new PIXI.Point(800,600);
+        // level size
+        
+        var world_size = new PIXI.Point(800,600);
+    
+        var stage = new PIXI.Stage(0x111111);
+        var renderer = new PIXI.autoDetectRenderer(screen.x,screen.y);
+        document.body.appendChild(this.renderer.view);
+        //var renderer =
+        
+        /*
+        http://www.html5gamedevs.com/topic/518-hack-making-all-2d-drawing-functions-available-to-pixi/
+        * /
+        PIXI.Texture.Draw = function (cb) {
+            var canvas = document.createElement('canvas');
+            if (typeof cb == 'function') cb(canvas);
+            return PIXI.Texture.fromCanvas(canvas);
+        }
+        /*
+        
+        * /
+        
+        var scale = 1;
+        
+        var origine = new PIXI.Point( screen_size.x / 2, screen_size.y / 2 );
+        
+        function world2screen(xw,yw) {
+            var x = ( xw - origine.x ) * scale + screen_size.x / 2;
+            var y = ( yw - origine.y ) * scale + screen_size.y / 2;
+            //var y = yw * scale - origine.y + screen_size.y / 2;
+            //console.log(x,y);
+            return new PIXI.Point(x ,y);
+        }
+        
+        //************  Node  *****************
+        
+        function Node(_x,_y,_type) {
+            this.center = new PIXI.Point(_x,_y);
+            //this.x = _x || 0;
+            //this.y = _y || 0;
+            this.type = _type || 0;
+        };
+
+        Node.prototype.constructor = Node;
+        
+        // TODO: extend PIXI.Sprite instead of encapsulating it ?
+        Node.prototype.setSprite = function(_spr) {
+            this.sprite = _spr || undefined;
+            if (_spr && _spr != undefined) {
+                this.sprite.x = this.center.x;
+                this.sprite.y = this.center.y;
+            }
+        };
+
+        Node.prototype.setCallback = function(_action,_cb) {
+            if (this.sprite.interactive == false) {
+                this.sprite.interactive = true;
+            }
+            switch(_action) {
+                case "mouseover":
+                    this.sprite.mouseover = _cb;
+                    break;
+                case "click":
+                    this.sprite.click = _cb;
+                    break;
+
+            }
+        };
+
+        Node.prototype.updateSprite = function () {
+            var pos = world2screen(this.center.x, this.center.y);
+            this.sprite.scale.x = this.sprite.scale.y = scale;
+            //console.log(this.sprite.x, this.sprite.scale);
+            this.sprite.position = pos;
+
+        };
+        
+        Node.prototype.setStage = function (_stage) {
+            _stage.addChild(this.sprite);
+        };
+        
+        
+        function make_sprite () {
+            var g = new PIXI.Graphics();
+            g.beginFill(0x1111dd);
+            g.drawRect(5,5,50,50);
+            g.endFill();
+            return new PIXI.Sprite(g.generateTexture());
+        };
+        
+        /** ingame menu ** /
+        
+        var MENU_COLOR = 0x1111ee;
+        
+        function GameMenu (title) {
+            //var g = new PIXI.Graphics()
+            var s = make_sectors(10);
+            draw_ld_corner(500,20,s['dl']);
+            //stage.addChild(g);
+        }
+        
+        
+        function make_sectors(h) {
+            var sectors = {};
+            var g = new PIXI.Graphics();
+            g.beginFill(0,0); // transparent background
+            g.drawRect(0,0,2*h,2*h);
+            g.beginFill(MENU_COLOR);
+            g.drawCircle(h,h,h);
+            g.endFill();
+            g.bounds = new PIXI.Rectangle(0,0,h,h);
+            sectors['ul'] = g.generateTexture();
+            g.bounds = new PIXI.Rectangle(h,0,h,h);
+            sectors['ur'] = g.generateTexture();
+            g.bounds = new PIXI.Rectangle(0,h,h,h);
+            sectors['dl'] = g.generateTexture();
+            g.bounds = new PIXI.Rectangle(h,h,h,h);
+            sectors['dr'] = g.generateTexture();
+            return sectors;
+        }
+        
+        function draw_ld_corner(canvas) {
+            var r = 10; //radius
+            canvas.width = r * 4;   //you need to specify your canvas width and height otherwise it'll have a size of 0x0 and you'll get an empty sprite
+            canvas.height = r * 4;
+
+            var ctx = canvas.getContext('2d');  //get  canvas 2D context
+            
+            ctx.fillStyle = 'rgb(255, 0, 0)';
+            ctx.beginPath();
+            // x,y, r, a1,a2, (counter)clockwise
+            ctx.arc(r, r, r, 0, -Math.PI / 2, true);
+            ctx.lineTo(0,0);
+            ctx.arc(r, 0, r, Math.PI , Math.PI / 2, true);
+            //ctx.lineTo(r,0);
+            ctx.closePath();
+            
+            
+            ctx.fill();
+            
+        }
+        
+        
+        //function 
+        
+        
+        function make_game_menu(canvas) {
+            // title
+            var title = new PIXI.Text('MENU',{font:"bold 12px Arial"});
+            // items
+            var options = [];
+            var w = title.width;
+            // TODO: use loop
+            var opt = new PIXI.Text('Options',{font:"12px Arial"});
+            if (opt.width > w) w = opt.width;
+            options.push(opt);
+            var opt = new PIXI.Text('Quit',{font:"12px Arial"});
+            if (opt.width > w) w = opt.width;
+            options.push(opt);
+            var h = title.height;
+            // draw menu /closed
+            canvas.width = w+h+4;
+            canvas.height = h+2;
+            console.log(w,h);
+            var ctx = canvas.getContext("2d");
+            
+            ctx.fillStyle = "#0000ee";
+            console.log
+            ctx.beginPath();
+            //ctx.arc(h + 2, 0, h+2, Math.PI, Math.PI / 2 , true);
+            ctx.moveTo(0,0);
+            ctx.lineTo(h + 2 + w + 2, 0);
+            ctx.lineTo(h + 2 + w + 2, h + 2);
+            ctx.lineTo(h + 2, h + 2);
+            ctx.arc(h + 2, 0, h+2, Math.PI, Math.PI / 2 , true);
+            ctx.closePath();
+            ctx.fill();
+            console.log(canvas);
+            //canvas.appendChild(title);
+        }
+        
+        
+        
+        
+        /*
+        function draw_ld_corner(x,y,sector) {
+            //var old = g.bounds;
+            var g = new PIXI.Graphics();
+            g.x = x;
+            g.y = y;
+            //g.beginFill(0x000000,0);
+            //g.drawRect(0,0,2*h,h);
+            //console.log(sector);
+            //g.addChild(sector);
+            //g.bounds = new PIXI.Rectangle(0,0,h,h);
+            /*g.drawCircle(h,0,h);
+            //g.bounds = new PIXI.Rectangle(x+h,y,h,h);
+            g.drawCircle(h,h,h);
+            //g.bounds = old;
+            g.endFill();
+            g.lineStyle(2,0xeeeeee);
+            g.moveTo(x+h/2,y+h/4);
+            g.lineTo(x+h,y+3*h/4);
+            g.lineTo(x+3*h/2,y+h/4);* /
+            // register click callback on 'button'
+            stage.addChild(g);
+        }
+        * /
+        
+        
+        
+        
+        function processKeys (event) {
+            //console.log('key pressed',event.keyCode);
+            // '+'
+            if (107 == event.keyCode) {
+                //console.log('>> +');
+                scale += 0.1;
+            }
+            //console.log(' - key pressed',event.keyCode);
+            else if (109 == event.keyCode) {
+                //console.log('>> -');
+                scale -= 0.1;
+            }
+            // 37,38,39,40 > R,U,L,D
+            else if (event.keyCode == 37) {
+                origine.x -= 5;
+            }
+            else if (event.keyCode == 38) {
+                origine.y -= 5;
+            }
+            else if (event.keyCode == 39) {
+                origine.x += 5;
+            }
+            else if (event.keyCode == 40) {
+                origine.y += 5;
+            }
+            else if (event.keyCode == 'f') {
+                //console.log('f');
+            }
+            else {
+                //console.log('???');
+            };
+            return true;
+        }
+
+        document.addEventListener('keydown', processKeys);
+        
+        var pending_queue = [];
+        /*
+        function Event() {
+            for (var i = 0; i < pending_queue.length; i++) {
+                pending_queue[i].call();
+            }
+            
+        }* /
+        
+        
+        
+
+        /**  test  ** /
+        var node = new Node(60,120,3);
+        node.setSprite(make_sprite());
+        var node2 = new Node(520,80,3);
+        node2.setSprite(make_sprite());
+        node.setCallback('click', function (data) {
+            console.log('click');
+        });
+        node.setStage(stage);
+        node2.setStage(stage);
+        
+        
+        
+        //var title = new PIXI.Text('MENU',{font:"bold 14px Arial",fill:'#882222'});
+        //title.color = "#222222";
+        var sprite = new PIXI.Sprite(PIXI.Texture.Draw(make_game_menu));
+        
+        stage.addChild(sprite);
+        sprite.x = sprite.y = 20;
+        //stage.addChild(title);
+        //title.x = 20 + title.height + 2;
+        //title.y = 23;
+        requestAnimFrame(animate);
+        
+        
+        
+        //var game = new Game('hello');
+
+        //GameMenu(1);
+
+        //var s = 'anon-';
+        //console.log(s+1);
+
+
+        //var v = DE.Vector(3,2);
+
+        //console.log(game);
+
+        function animate() {
+            requestAnimFrame(animate);
+            //var g = game;
+            //game.update();
+            
+            // game events
+            var pending = [];
+            for (var i = 0; i < pending_queue.length; i++) {
+                ret = pending_queue[i].call();
+                if (ret == true) {
+                    pending.push(pending_queue[i]);
+                }
+                
+            }
+            pending_queue = pending;
+            
+            node.updateSprite();
+            node2.updateSprite();
+            renderer.render(stage);
+        }
+        * /
+        var g = new PIXI.Graphics();
+        g.beginFill()
+        
+        var neutral_color = 0xeeeeee; // greyish white
+        
+        //var num_node = 0;
+        //var staged_node = 
+        
+        function Node (size, x, y) {
+            //this.id = num_node ++ ;
+            console.log(size,x,y);
+            this.size = size || 1;
+            this.x = x || 0;
+            this.y = y || 0;
+            this.firewall = 100;
+            
+        }
+        
+        Node.prototype.constructor = Node;
+        
+        Node.prototype.get_sprite = function (idx) {
+            //console.log('-> get sprite');
+            if (undefined == this.sprite) {
+                //console.log('new sprite');
+                var size = this.size;
+                console.log(size);
+                var g = new PIXI.Graphics();
+                g.beginFill(neutral_color);
+                g.drawCircle(10*size,10*size,10*size);
+                g.endFill()
+                this.sprite = new PIXI.Sprite(g.generateTexture());
+                this.sprite.anchor.x = this.sprite.anchor.y = 0.5;
+                this.sprite.x = this.x;
+                this.sprite.y = this.y;
+                this.sprite.setInteractive(true);
+                console.log('>>',idx);
+                this.sprite.node_id = idx;
+                //console.log('callback...');
+                this.sprite.click = print_node_info;
+                //console.log('done');
+            }
+            //console.log(this.sprite);
+            return this.sprite;
+        }
+        
+        
+        function print_node_info(data) {
+            console.log('cb info',data,data.target.node_id);
+            var idx = data.target.node_id;
+            var n = level.nodes[idx];
+            var h = 0;
+            var w = 0;
+            var y = 5;
+            // firewall health
+            info_firewall = new PIXI.Text("firewall ".concat(n.firewall),{font:'14px Arial',fill:'#eeeeee'});
+            info_firewall.x = 5;
+            info_firewall.y = y;
+            h += info_firewall.height;
+            if (info_firewall.width > w) w=info_firewall.width;
+            y += h;
+            // node ID
+            info_id = new PIXI.Text("ID ".concat(idx),{font:'14px Arial',fill:'#eeeeee'});
+            info_id.x = 5;
+            info_id.y = y;
+            h += info_id.height;
+            if (info_id.width > w) w=info_id.width;
+            // background
+            var info_back = new PIXI.Graphics();
+            info_back.beginFill(0x111188);
+            info_back.drawRect(5,5,w,h);
+            info_back.endFill();
+            
+            stage.addChild(info_back);
+            stage.addChild(info_firewall)
+            stage.addChild(info_id);
+        }
+        
+        
+        dummy_level = {
+            nodes:{
+                0:[1,50,90],
+                1:[2,100,90],
+                2:[3,150,90]
+            }
+            
+        };
+        
+        
+        function Level () {
+            this.nodes = [];
+        }
+        
+        Level.prototype.constructor = Level;
+        
+        Level.prototype.load = function (data) {
+            //var nodes = data['nodes'];
+            var nodes = data.nodes;
+            console.log(data,nodes);
+            for ( var i in nodes) {
+            //for (var i=0;i<nodes.length;i++) {
+                var n = nodes[i];
+                
+                console.log(n);
+                this.nodes[i] = new Node (n[0],n[1],n[2]);
+                
+            }
+        }
+        
+        function Player () {
+            var name = 'player';
+            //var visible = []; // list of discovered nodes
+            
+        }
+        
+        Player.prototype.constructor = Player;
+        
+        
+        
+        // create stage, renderer
+        var stage = new PIXI.Stage(0x111111,true);
+        var renderer = new PIXI.autoDetectRenderer(640,480);
+        document.body.appendChild(this.renderer.view);
+        
+        // create nodes/level
+        
+        var level = new Level();
+        level.load(dummy_level);
+        console.log(level.nodes);
+        for (var i=0; i < level.nodes.length; i++) {
+            var n = level.nodes[i];
+            //console.log(n);
+            var sp = n.get_sprite(i);
+            //console.log(sp);
+            stage.addChild(sp);
+        }
+        
+        // create player
+        
+        
+        // create viewport - or not...
+        
+        //var viewport = new Viewport(640,480); // ou centre + zoom
+        // var viewport = new Viewport(320,240,1);
+        
+        // 
+        
+        
+        console.log('defining main');
+        
+        function game_loop() {
+            requestAnimFrame(game_loop);
+            // draw nodes
+            
+            // draw texts - info, menu
+            
+            //stage.addChild(sprite);
+            
+            
+            renderer.render(stage);
+        }
+        
+        
+        requestAnimFrame(game_loop);
+        
+        
+        */
+        
+        
+    window.onload = function() {
+
+        var game = new Phaser.Game(800, 600, Phaser.CANVAS, '', { preload: preload, create: create, update:update });
+        
+        
+        // *** gameplay ***
+        var nodes = [];
+        
+        // *** display ***
+        // main display groups
+        var zoomGroup;
+        var uiGroup;
+        // zoom/pan affects nodes and links + anim associated
+        
+        
+        // utility display groups
+        var nodeGroup;
+        var linkGroup;
+        
+        // 
+        var worldScale = 1.0;
+        //worldWidth = 800;
+        //worldHeight = 600;
+        
+        var nodeIdleTimer;
+            
+        var activeNode = null;
+            
+        var activePanel = null;
+        
+        
+        var network;
+        
+        
+        /***************************************************************************
+        
+                Program
+                
+        ****************************************************************************/
+        
+        var PRGM_EXTRACTOR;
+        var PRGM_RESEARCH
+        
+        
+        function Program(owner, type) {
+            this.owner = owner;
+            this.type = type;
+        }
+        
+        Program.prototype.run = function() {
+            if(this.type == PRGM_EXTRACTOR) {
+                this.owner
+            }
+        }
+        
+        
+        
+        /***************************************************************************
+        
+                Node
+        
+        ****************************************************************************/
+        
+        function Node (i) {
+            this.id = i || 0;
+            // child[0] - graphics
+            // child[1] - anim
+            this.links = [];  // index in links array
+            this.sprite = null;
+            this.prgms = [];
+            this.firewall = 100;
+            // 0 - 19 
+            this.animIdleFrame = 0;
+            this.anim = null;
+        }
+        
+        Node.prototype.availableLink = function (links, k) {
+            var available = true;
+            console.log("check avail ", this.links.length, k, this.links);
+            for (var i = 0; i < this.links.length; i++) {
+                
+                var link_idx = this.links[i];
+                
+                var l = links[link_idx];
+                //console.log("links: ",links, i, link_idx, l);
+                if (l.n1 == k || l.n2 == k)
+                    available = false;
+            }
+            return available;
+        }
+        
+        Node.prototype.makeSprite = function(x, y) {
+            this.sprite = game.add.sprite(x, y);
+            //console.log(i, node);
+            //nodes[i].addChild(node_graphics);
+            
+            var node_graphics = game.add.graphics();
+            // TODO: check color                        ******    !!!     ******
+            node_graphics.beginFill(0x4286e9);
+            node_graphics.drawCircle(0, 0, 20);
+            node_graphics.endFill();
+            
+            this.sprite.addChild(node_graphics);
+            //nodes[i].anchor.setTo(0.5, 0.5);
+            this.sprite.anchor.setTo(0.5, 0.5);
+            this.sprite.inputEnabled = true;
+            this.sprite.parentNode = this;
+            this.sprite.events.onInputOver.add(nodeOver, this);
+            this.sprite.events.onInputOut.add(nodeOut, this);
+            return this.sprite;
+        }
+        
+        Node.prototype.renderIdle = function() {
+            //console.log('idling nodes');
+            if (this.anim == null) {
+                //var idle_graphics = game.add.graphics();
+                this.anim = game.add.graphics(); //idle_graphics;
+                this.anim.beginFill(0x22ee22);
+                this.anim.drawCircle(25, 0, 4);
+                this.anim.endFill();
+                this.sprite.addChild(this.anim);
+            } /* else {
+                var idle_graphics = this.anim;
+            }*/
+            this.anim.rotation = 2 * Math.PI * this.animIdleFrame / 50;
+            //25 * Math.cos(2 * Math.PI * this.animIdleFrame / 20)
+            this.animIdleFrame = (this.animIdleFrame + 1) % 50;
+            
+        }
+        
+        function Link(n1, n2) {
+            this.n1 = n1;
+            this.n2 = n2;
+            //n1.links.append(i);
+            //n2.links.append(i);
+            this.sprite = null;
+        }
+        
+        Link.prototype.registerIndex = function (nodes, i) {
+            nodes[this.n1].links.append(i);
+            nodes[this.n2].links.append(i);
+        }
+        
+        
+        Link.prototype.makeSprite = function (nodes) {
+            var x1 = nodes[this.n1].sprite.x;
+            var y1 = nodes[this.n1].sprite.y;
+            var x2 = nodes[this.n2].sprite.x;
+            var y2 = nodes[this.n2].sprite.y;
+            console.log("link: ", x1,y1,x2,y2);
+            this.sprite = game.add.sprite();  //Math.abs(x2 - x1), Math.abs(y2 - y1));
+            var link_graphics = game.add.graphics();
+            link_graphics.lineStyle(5, 0x278415);
+            link_graphics.moveTo(x1, y1);
+            link_graphics.lineTo(x2, y2);
+            //link_graphics.endFill();
+            this.sprite.addChild(link_graphics);
+            //this.sprite.anchor.setTo(0.5, 0.5);
+            return this.sprite;
+        }
+        
+        /**********************************************************************
+        
+                Player
+                
+        **********************************************************************/
+        
+        function Player(name) {
+            this.name = name;
+            this.node = null;
+        }
+        
+        /**********************************************************************
+        
+                Network
+        
+        **********************************************************************/
+        
+        function Grid(m,n) {
+            this.data = [];
+            
+        }
+        
+        Grid.prototype.exists = function (i, j) {
+            if (j in this.data) {
+                console.log(this.data[j]);
+                var l = this.data[j];
+                if (i in l) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        Grid.prototype.get = function (i, j) {
+            if( this.exists(i, j) ) {
+                var l = this.data[j];
+                return l[i];
+            }
+        }
+        
+        
+        Grid.prototype.add = function (i, j, d) {
+            if (j in this.data) {
+                var l = this.data[j];
+                if (i in l) {
+                    l[i] = d;
+                } else {
+                    l[i] = d;
+                }
+            } else {
+                var l = [];
+                l[i] = d;
+                this.data[j] = l;
+            }
+            
+        }
+        
+        
+        function Network() {
+            this.nodes = [];
+            this.links = [];
+            this.gates = [];
+            this.playerNode = [];
+            
+        }
+        
+        function arrayIndexFill(n) {
+            arr = [];
+            for (var i = 0; i<n; i++) {
+                arr.push(i);
+            }
+            return arr;
+        }
+        
+        function remove(arr, v) {
+            a = [];
+            for(var i=0; i<arr.length; i++) {
+                if(arr[i] != v) {
+                    a.push(arr[i]);
+                }
+            }
+            return a;
+        }
+        
+        Network.prototype.generateRandomNework = function (num_player, num_node, num_gates) {
+            var grid = new Grid(10,10);
+            //var nodes = [];
+            // generate gates
+            //onsole.log
+            // populate sectors
+            var x;
+            var y;
+            console.log("***  generating nodes...  ***");
+            for (var i = 0; i < num_node; i++) {
+                do {
+                    x = Math.floor(10 * Math.random());
+                    y = Math.floor(10 * Math.random());
+                    var placed = grid.exists(x, y);
+                    console.log(x, y, placed);
+                    
+                } while(placed == true);
+                grid.add(x, y, true);
+                var n = new Node(i);
+                console.log(i, x, y);
+                //this.nodes.append([x, y]);
+                this.nodes.push(n);
+                nodeGroup.add(n.makeSprite(40 * x, 40 * y));
+                
+            }
+            // link nodes
+            // Hint: fill first array with indexes except start node
+            //      
+            for (var j=0; j<3; j++) {
+                console.log('** ', j);
+            }
+            console.log("***  generating links...  ***");
+            var node_idx = Math.floor(10 * Math.random());
+            var free = arrayIndexFill(this.nodes.length);
+            remove(free, node_idx);
+            var pending = [];
+            var done = [];
+            var link_idx = 0;
+            for (var i = 0; i< num_node; i++) {
+                // 
+                // select nodes from dispo nodes
+                // add them to pending
+                
+                
+                var node = this.nodes[node_idx];
+                console.log('-- node ',node_idx,node.links.length);
+                var temp_num_link = 0;
+                var node_num_links = node.links.length;
+                for (var j = 0; j < (3 - node_num_links); j++) {
+                    
+                    temp_num_link ++;
+                    var other_node;
+                    // select a node among:
+                    //  - free node if any
+                    //  - pending otherwise
+                    do {
+                        //var k = Math.floor((free.length + pending.length) * Math.random());
+                        if (free.length != 0) {
+                            var k = Math.floor(free.length * Math.random());
+                            other_node = this.nodes[free[k]];
+                            
+                        } else {
+                            var k = Math.floor(pending.length * Math.random());
+                            other_node = this.nodes[pending[k]];
+                        }
+                        // check k isn't already selected
+                    } while (!node.availableLink(this.links, k));
+                    console.log(' + ', j, k, other_node.links.length);
+                    // node pending treatment or not
+                    
+                    //other_node = this.nodes[k];
+                    //console.log("connecting to ", k, other_node);
+                    
+                    if (k in free) {
+                        remove(free, k);
+                        pending.push(k);
+                    }
+                    var link = new Link(node_idx, k);
+                    linkGroup.add(link.makeSprite(this.nodes));
+                    this.links.push(link);
+                    node.links.push(link_idx);
+                    other_node.links.push(link_idx);
+                    link_idx ++;
+                    // completion of the node ?
+                    if (other_node.links.length == 3) {
+                        remove(pending, k);
+                        done.push(k);
+                        // this node is already completely treated
+                        // no need to iter on it later
+                        //i++;
+                    }
+                }
+                //console.log('add ', temp_num_link);
+                // TEMP : REOMVE WHEN DEBUGGED
+                //pending.push(free.pop());
+                // -- TEMP
+                done.push(node_idx);
+                node_idx = pending.pop();
+                // add created link(s)
+                
+            
+            }
+            /*
+            for (var i = 0; i < num_node; i++) {
+                for (var j = 0; j < 3; j++) {
+                    var placed = false;
+                    var node = this.nodes[i];
+                    //change -> modify to use a propagation algorithm for  link attribution
+                    // 
+                    
+                    if (node.links.length < 3) {
+                        var tried = [];
+                        do {
+                            // get another not full node
+                            var k = Math.floor(10 * Math.random());
+                            if (k == i)
+                                continue;
+                            if (k in tried)
+                            // parcourt links used by node i
+                            for (var l=0; l < this.links.length; )
+                        } while();
+                    }
+                    
+                }
+                
+            }*/
+            
+            // one node per sector to be home node
+        }
+        
+        // 
+        
+        Network.prototype.isAttackable = function (start, end) {
+            
+            
+        }
+        
+        
+        
+        
+        
+        
+        function Panel (t) {
+            //this.width = w || 100;
+            //this.height = w || 150;
+            this.text = t || [];
+            this.sprite = null;
+        }
+        
+        Panel.prototype.makeSprite = function() {
+            this.sprite = game.add.sprite(0, 0);
+            var panel = game.add.graphics();
+            panel.beginFill(0x22dddd);
+            panel.drawRect(0, 0, 200, 600 - 30 );
+            panel.endFill();
+            //this.sprite.addChild(panel);
+            for (var i = 0; i < this.text.length; i++) {
+                var t = this.text[i];
+                
+                var txt = game.add.text(10, 5 + 30 * i, t, {font:'20 px Courier', fill:'#FFFFFF'});
+                //txt.position.set(10, 5+ 30 * i);
+                txt.anchor.set(0.0);
+                panel.addChild(txt);
+                //this.sprite.addChild(txt);
+            }
+            this.sprite.setTexture(panel.generateTexture());
+            this.sprite.anchor.setTo(0.0, 0.0);
+            return this.sprite;
+            //return panel
+        }
+        
+        
+        function nodeOver (t) {
+            //console.log('click node', t.parentNode, uiGroup);
+            //activePanel = new Panel(['Hello','World']);
+            activeNode = t.parentNode;
+            
+            //var spr = activePanel.makeSprite();
+            console.log('---> ', activeNode.id); //spr.x, spr.y, spr.width, spr.height);
+            //uiGroup.add(spr);
+        }
+        
+        function nodeOut (t) {
+            activeNode = null;
+            console.log('<--', t.parentNode.id);
+        }
+        /* */   
+            
+        
+        
+        
+        function preload () {
+
+            game.load.image('logo', 'phaser.png');
+            
+
+        }
+
+        function create () {
+            uiGroup = game.add.group();
+            var logo = game.add.sprite(game.world.centerX, game.world.centerY, 'logo');
+            logo.anchor.setTo(0.5, 0.5);
+            uiGroup.add(logo);
+            console.log(uiGroup.x, uiGroup.y);
+            var mainUI = game.add.sprite(0, 600 - 30);
+            var mainUI_graphics = game.add.graphics();
+            mainUI_graphics.beginFill(0x42d659);
+            mainUI_graphics.drawRect(0, 0, 800, 30);
+            mainUI_graphics.endFill();
+            mainUI.addChild(mainUI_graphics);
+            mainUI.anchor.setTo(0.0, 1.0);
+            uiGroup.add(mainUI);
+            
+            var grid = new Grid(10, 10);
+            grid.add(3,5,'hello');
+            grid.add(2,7,'world');
+            console.log('from grid', grid.get(3,5));
+            //uiGroup.anchor.setTo(0.5, 0.5);
+            //logo.autoCull = true;
+            //console.log('click node', t.parentNode, uiGroup);
+            var panel = new Panel(['Hello','World']);
+            
+            var spr = panel.makeSprite();
+            spr.position.set(600,0);
+            /*var psprite = game.add.sprite(600, 0);
+            var panel = game.add.graphics();
+            panel.beginFill(0x22dddd);
+            panel.drawRect(600, 0, 200, 600 - 30);
+            panel.endFill();
+            for (var i = 0; i < this.text.length; i++) {
+                t = this.text[i];
+            }
+            
+            psprite.addChild(panel);
+            //psprite.anchor.setTo(0.0, 0.0);
+            console.log('---> ', psprite.x, psprite.y, psprite.width, psprite.height);*/
+            uiGroup.add(spr);
+            /*
+            var node_graphics = game.add.graphics();
+            node_graphics.beginFill(0x4286e9);
+            node_graphics.drawCircle(20, 20, 20);
+            node_graphics.endFill();*/
+            
+            //game.camera.setSize(400, 300);
+            zoomGroup = game.add.group();
+            nodeGroup = game.add.group();
+            linkGroup = game.add.group();
+            zoomGroup.add(nodeGroup);
+            zoomGroup.add(linkGroup);
+            network = new Network();
+            //console.log('network creating; now populating');
+            network.generateRandomNework(0, 10, 0);
+            /*for (var i=0; i<10; i++) {
+                //nodes[i] = game.add.sprite(100 + 40 * i, 100);
+                
+                var node = new Node(i);
+                nodes.push(node);
+                
+                nodeGroup.add(node.makeSprite(40 * i, 10 * i));
+                
+                //nodes.create(100 + 40 * i, 100, node_graphics);
+                
+            }
+            */
+            var link = game.add.sprite((45+120)/2, (20+250)/2);
+            var link_graphics = game.add.graphics();
+            link_graphics.lineStyle(5, 0x278415);
+            link_graphics.moveTo(45, 20);
+            link_graphics.lineTo(120, 250);
+            //link_graphics.endFill();
+            link.addChild(link);
+            link.anchor.setTo(0.5, 0.5);
+            
+            game.input.onDown.add(mouseClick, this);
+            
+            //nodeIdleTimer = game.add.timer();
+            
+            
+            
+
+        }
+        /*
+        mapSizeMaxCurrent = 600;
+        mapSizeMax = 600;
+        worldScale = 1.0;
+        worldwidth = 800;
+            
+        function updateLevelstatus(){
+            console.log('update zoom');
+            // zoom in/out with a/o
+            if (game.input.keyboard.isDown(Phaser.Keyboard.A) && (mapSizeMaxCurrent < mapSizeMax)) { mapSizeMaxCurrent += 32; }
+            else if (game.input.keyboard.isDown(Phaser.Keyboard.O) && (mapSizeMaxCurrent > worldwidth )) { mapSizeMaxCurrent -= 32; }
+
+            mapSizeMaxCurrent = Phaser.Math.clamp(mapSizeMaxCurrent, worldwidth , mapSizeMax); 
+            worldScale = mapSizeMaxCurrent/mapSizeMax;
+
+            stageGroup.scale.set(worldScale);  // scales my stageGroup (contains all objects that shouldbe scaled)
+
+            if(game.input.activePointer.isDown && !game.input.pointer2.isDown){   //move around the world
+                if (oldcamera) { 
+                    game.camera.x += oldcamera.x - game.input.activePointer.position.x; 
+                    game.camera.y += oldcamera.y - game.input.activePointer.position.y; 
+                }
+                oldcamera = game.input.activePointer.position.clone();
+                // store current camera position (relative to the actual scale size of the world)
+                rescalefactorx = mapSizeX / (mapSizeX * worldScale); // multiply by rescalefactor to get original world value
+                rescalefactory = mapSizeY / (mapSizeY * worldScale);
+                currentcamerapositionX = game.camera.view.centerX*rescalefactorx;
+                currentcamerapositionY = game.camera.view.centerY*rescalefactory;
+            }
+            else { //center camera on the point that was in the center of the view atm the zooming started
+                oldcamera = null;
+                if (!currentcamerapositionX){ // if not set yet (never zoomed)
+                    currentcamerapositionX = game.camera.view.centerX;
+                    currentcamerapositionY = game.camera.view.centerY;
+                }
+                followx = currentcamerapositionX*worldScale;
+                followy = currentcamerapositionY*worldScale;
+
+                game.camera.focusOnXY(followx, followy);
+            }
+        }
+        /* */
+            
+        function updateZoomPan() {
+            
+            
+        }
+        
+        function updateScale(x, y, scale) {
+            zoomGroup.scale.set(scale);
+            game.camera.width = game.world.width / scale;
+            game.camera.height = game.world.height / scale;
+            game.camera.focusOnXY(x, y);
+            zoomGroup.x = Math.round(x - game.camera.width / 2);
+            zoomGroup.y = Math.round(y - game.camera.height / 2);
+            //console.log(uiGroup.x);
+        }
+        
+        
+        
+        var update_console = 0;
+        var scaled = 0;
+        var deltax = 0;
+            
+        function update() {
+            if (update_console == 0) {
+                console.log('update', game.camera.view.centerX, game.camera.view.centerY, game.world.width);
+                update_console = 1;
+                /*
+                zoomGroup.scale.set(2);
+                //game.camera.scale.set
+                game.camera.width = 400;
+                game.camera.height = 300;
+                game.camera.focusOnXY(250,150);
+                */
+                //updateScale(250, 150, 2);
+                
+            }
+            
+            scaled = 1; //1;
+            /*if (worldScale < 1.5) {
+                worldScale += 0.01;
+                scaled = 0;
+            }*/
+            if (scaled == 1 && deltax < 50) {
+                deltax += 1;
+            }   /**/
+            if (activePanel !== null) {
+                console.log('OK');
+            }
+            var s = uiGroup.getAt(2);
+            s.position.set(700 - deltax, 0);
+            updateScale(400 - deltax,300, worldScale);
+            for (var i = 0; i < nodes.length; i++ ) {
+                nodes[i].renderIdle();
+            }
+            /*
+             0: check can zoom ?(in/out)
+             1: resize world
+             2: center camera
+             3: adjust camera center if out of bounds
+            
+            */
+            //updateLevelstatus();
+        }
+            
+        function mouseClick() {
+            if (activeNode == null) {
+                console.log('disappear');
+            } else {
+                console.log('appear');
+            }
+            console.log(game.input.x, game.input.y);
+        }
+        
+        
+        
+    };
+        
+        
+    </script> <!-- -->
+</html>
