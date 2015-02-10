@@ -4,11 +4,21 @@
     	<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <title>Hack World</title>
         <link href="hackworld.css" rel="stylesheet" type="text/css">
-        <script type="text/javascript" src="pixi.dev.js"></script>
+        <!--<script type="text/javascript" src="pixi.dev.js"></script> -->
         <script type="text/javascript" src="jquery-2.1.1.js"></script>
         <!--<script type="text/javascript" src="toolkit.js"></script>
         <script type="text/javascript" src="hackworld.js"></script> -->
         <script type="text/javascript" src="phaser.js"></script>
+        <script type="text/javascript" src="src/boot.js"></script>
+        <!-- game objects, utilitaires -->
+        <script type="text/javascript" src="src/nodes.js"></script>
+        <script type="text/javascript" src="src/board.js"></script>
+        <!-- game states -->
+        <script type="text/javascript" src="src/preload.js"></script>
+        <script type="text/javascript" src="src/mainmenu.js"></script>
+        <script type="text/javascript" src="src/game.js"></script>
+        <!--<script type="text/javascript" src="phaser.js"></script>
+        <script type="text/javascript" src="phaser.js"></script> -->
     </head>
     <body>
         <!--<p id="temptitle">ABC</p>-->
@@ -18,495 +28,17 @@
     </script> -->
     <!-- -->
     <script type="text/javascript">
-        
-        /*
-        var screen_size = new PIXI.Point(800,600);
-        // level size
-        
-        var world_size = new PIXI.Point(800,600);
-    
-        var stage = new PIXI.Stage(0x111111);
-        var renderer = new PIXI.autoDetectRenderer(screen.x,screen.y);
-        document.body.appendChild(this.renderer.view);
-        //var renderer =
-        
-        /*
-        http://www.html5gamedevs.com/topic/518-hack-making-all-2d-drawing-functions-available-to-pixi/
-        * /
-        PIXI.Texture.Draw = function (cb) {
-            var canvas = document.createElement('canvas');
-            if (typeof cb == 'function') cb(canvas);
-            return PIXI.Texture.fromCanvas(canvas);
-        }
-        /*
-        
-        * /
-        
-        var scale = 1;
-        
-        var origine = new PIXI.Point( screen_size.x / 2, screen_size.y / 2 );
-        
-        function world2screen(xw,yw) {
-            var x = ( xw - origine.x ) * scale + screen_size.x / 2;
-            var y = ( yw - origine.y ) * scale + screen_size.y / 2;
-            //var y = yw * scale - origine.y + screen_size.y / 2;
-            //console.log(x,y);
-            return new PIXI.Point(x ,y);
-        }
-        
-        //************  Node  *****************
-        
-        function Node(_x,_y,_type) {
-            this.center = new PIXI.Point(_x,_y);
-            //this.x = _x || 0;
-            //this.y = _y || 0;
-            this.type = _type || 0;
-        };
-
-        Node.prototype.constructor = Node;
-        
-        // TODO: extend PIXI.Sprite instead of encapsulating it ?
-        Node.prototype.setSprite = function(_spr) {
-            this.sprite = _spr || undefined;
-            if (_spr && _spr != undefined) {
-                this.sprite.x = this.center.x;
-                this.sprite.y = this.center.y;
-            }
-        };
-
-        Node.prototype.setCallback = function(_action,_cb) {
-            if (this.sprite.interactive == false) {
-                this.sprite.interactive = true;
-            }
-            switch(_action) {
-                case "mouseover":
-                    this.sprite.mouseover = _cb;
-                    break;
-                case "click":
-                    this.sprite.click = _cb;
-                    break;
-
-            }
-        };
-
-        Node.prototype.updateSprite = function () {
-            var pos = world2screen(this.center.x, this.center.y);
-            this.sprite.scale.x = this.sprite.scale.y = scale;
-            //console.log(this.sprite.x, this.sprite.scale);
-            this.sprite.position = pos;
-
-        };
-        
-        Node.prototype.setStage = function (_stage) {
-            _stage.addChild(this.sprite);
-        };
-        
-        
-        function make_sprite () {
-            var g = new PIXI.Graphics();
-            g.beginFill(0x1111dd);
-            g.drawRect(5,5,50,50);
-            g.endFill();
-            return new PIXI.Sprite(g.generateTexture());
-        };
-        
-        /** ingame menu ** /
-        
-        var MENU_COLOR = 0x1111ee;
-        
-        function GameMenu (title) {
-            //var g = new PIXI.Graphics()
-            var s = make_sectors(10);
-            draw_ld_corner(500,20,s['dl']);
-            //stage.addChild(g);
-        }
-        
-        
-        function make_sectors(h) {
-            var sectors = {};
-            var g = new PIXI.Graphics();
-            g.beginFill(0,0); // transparent background
-            g.drawRect(0,0,2*h,2*h);
-            g.beginFill(MENU_COLOR);
-            g.drawCircle(h,h,h);
-            g.endFill();
-            g.bounds = new PIXI.Rectangle(0,0,h,h);
-            sectors['ul'] = g.generateTexture();
-            g.bounds = new PIXI.Rectangle(h,0,h,h);
-            sectors['ur'] = g.generateTexture();
-            g.bounds = new PIXI.Rectangle(0,h,h,h);
-            sectors['dl'] = g.generateTexture();
-            g.bounds = new PIXI.Rectangle(h,h,h,h);
-            sectors['dr'] = g.generateTexture();
-            return sectors;
-        }
-        
-        function draw_ld_corner(canvas) {
-            var r = 10; //radius
-            canvas.width = r * 4;   //you need to specify your canvas width and height otherwise it'll have a size of 0x0 and you'll get an empty sprite
-            canvas.height = r * 4;
-
-            var ctx = canvas.getContext('2d');  //get  canvas 2D context
-            
-            ctx.fillStyle = 'rgb(255, 0, 0)';
-            ctx.beginPath();
-            // x,y, r, a1,a2, (counter)clockwise
-            ctx.arc(r, r, r, 0, -Math.PI / 2, true);
-            ctx.lineTo(0,0);
-            ctx.arc(r, 0, r, Math.PI , Math.PI / 2, true);
-            //ctx.lineTo(r,0);
-            ctx.closePath();
-            
-            
-            ctx.fill();
-            
-        }
-        
-        
-        //function 
-        
-        
-        function make_game_menu(canvas) {
-            // title
-            var title = new PIXI.Text('MENU',{font:"bold 12px Arial"});
-            // items
-            var options = [];
-            var w = title.width;
-            // TODO: use loop
-            var opt = new PIXI.Text('Options',{font:"12px Arial"});
-            if (opt.width > w) w = opt.width;
-            options.push(opt);
-            var opt = new PIXI.Text('Quit',{font:"12px Arial"});
-            if (opt.width > w) w = opt.width;
-            options.push(opt);
-            var h = title.height;
-            // draw menu /closed
-            canvas.width = w+h+4;
-            canvas.height = h+2;
-            console.log(w,h);
-            var ctx = canvas.getContext("2d");
-            
-            ctx.fillStyle = "#0000ee";
-            console.log
-            ctx.beginPath();
-            //ctx.arc(h + 2, 0, h+2, Math.PI, Math.PI / 2 , true);
-            ctx.moveTo(0,0);
-            ctx.lineTo(h + 2 + w + 2, 0);
-            ctx.lineTo(h + 2 + w + 2, h + 2);
-            ctx.lineTo(h + 2, h + 2);
-            ctx.arc(h + 2, 0, h+2, Math.PI, Math.PI / 2 , true);
-            ctx.closePath();
-            ctx.fill();
-            console.log(canvas);
-            //canvas.appendChild(title);
-        }
-        
-        
+        (function() {
+            var game = new Phaser.Game(800, 600, Phaser.AUTO);
+            console.log('states...');
+            game.state.add('Preload', HW.Preload);
+            game.state.add('MainMenu', HW.MainMenu);
+            game.state.add('Game', HW.Game);
+            game.state.start('Preload');
+        })();
         
         
         /*
-        function draw_ld_corner(x,y,sector) {
-            //var old = g.bounds;
-            var g = new PIXI.Graphics();
-            g.x = x;
-            g.y = y;
-            //g.beginFill(0x000000,0);
-            //g.drawRect(0,0,2*h,h);
-            //console.log(sector);
-            //g.addChild(sector);
-            //g.bounds = new PIXI.Rectangle(0,0,h,h);
-            /*g.drawCircle(h,0,h);
-            //g.bounds = new PIXI.Rectangle(x+h,y,h,h);
-            g.drawCircle(h,h,h);
-            //g.bounds = old;
-            g.endFill();
-            g.lineStyle(2,0xeeeeee);
-            g.moveTo(x+h/2,y+h/4);
-            g.lineTo(x+h,y+3*h/4);
-            g.lineTo(x+3*h/2,y+h/4);* /
-            // register click callback on 'button'
-            stage.addChild(g);
-        }
-        * /
-        
-        
-        
-        
-        function processKeys (event) {
-            //console.log('key pressed',event.keyCode);
-            // '+'
-            if (107 == event.keyCode) {
-                //console.log('>> +');
-                scale += 0.1;
-            }
-            //console.log(' - key pressed',event.keyCode);
-            else if (109 == event.keyCode) {
-                //console.log('>> -');
-                scale -= 0.1;
-            }
-            // 37,38,39,40 > R,U,L,D
-            else if (event.keyCode == 37) {
-                origine.x -= 5;
-            }
-            else if (event.keyCode == 38) {
-                origine.y -= 5;
-            }
-            else if (event.keyCode == 39) {
-                origine.x += 5;
-            }
-            else if (event.keyCode == 40) {
-                origine.y += 5;
-            }
-            else if (event.keyCode == 'f') {
-                //console.log('f');
-            }
-            else {
-                //console.log('???');
-            };
-            return true;
-        }
-
-        document.addEventListener('keydown', processKeys);
-        
-        var pending_queue = [];
-        /*
-        function Event() {
-            for (var i = 0; i < pending_queue.length; i++) {
-                pending_queue[i].call();
-            }
-            
-        }* /
-        
-        
-        
-
-        /**  test  ** /
-        var node = new Node(60,120,3);
-        node.setSprite(make_sprite());
-        var node2 = new Node(520,80,3);
-        node2.setSprite(make_sprite());
-        node.setCallback('click', function (data) {
-            console.log('click');
-        });
-        node.setStage(stage);
-        node2.setStage(stage);
-        
-        
-        
-        //var title = new PIXI.Text('MENU',{font:"bold 14px Arial",fill:'#882222'});
-        //title.color = "#222222";
-        var sprite = new PIXI.Sprite(PIXI.Texture.Draw(make_game_menu));
-        
-        stage.addChild(sprite);
-        sprite.x = sprite.y = 20;
-        //stage.addChild(title);
-        //title.x = 20 + title.height + 2;
-        //title.y = 23;
-        requestAnimFrame(animate);
-        
-        
-        
-        //var game = new Game('hello');
-
-        //GameMenu(1);
-
-        //var s = 'anon-';
-        //console.log(s+1);
-
-
-        //var v = DE.Vector(3,2);
-
-        //console.log(game);
-
-        function animate() {
-            requestAnimFrame(animate);
-            //var g = game;
-            //game.update();
-            
-            // game events
-            var pending = [];
-            for (var i = 0; i < pending_queue.length; i++) {
-                ret = pending_queue[i].call();
-                if (ret == true) {
-                    pending.push(pending_queue[i]);
-                }
-                
-            }
-            pending_queue = pending;
-            
-            node.updateSprite();
-            node2.updateSprite();
-            renderer.render(stage);
-        }
-        * /
-        var g = new PIXI.Graphics();
-        g.beginFill()
-        
-        var neutral_color = 0xeeeeee; // greyish white
-        
-        //var num_node = 0;
-        //var staged_node = 
-        
-        function Node (size, x, y) {
-            //this.id = num_node ++ ;
-            console.log(size,x,y);
-            this.size = size || 1;
-            this.x = x || 0;
-            this.y = y || 0;
-            this.firewall = 100;
-            
-        }
-        
-        Node.prototype.constructor = Node;
-        
-        Node.prototype.get_sprite = function (idx) {
-            //console.log('-> get sprite');
-            if (undefined == this.sprite) {
-                //console.log('new sprite');
-                var size = this.size;
-                console.log(size);
-                var g = new PIXI.Graphics();
-                g.beginFill(neutral_color);
-                g.drawCircle(10*size,10*size,10*size);
-                g.endFill()
-                this.sprite = new PIXI.Sprite(g.generateTexture());
-                this.sprite.anchor.x = this.sprite.anchor.y = 0.5;
-                this.sprite.x = this.x;
-                this.sprite.y = this.y;
-                this.sprite.setInteractive(true);
-                console.log('>>',idx);
-                this.sprite.node_id = idx;
-                //console.log('callback...');
-                this.sprite.click = print_node_info;
-                //console.log('done');
-            }
-            //console.log(this.sprite);
-            return this.sprite;
-        }
-        
-        
-        function print_node_info(data) {
-            console.log('cb info',data,data.target.node_id);
-            var idx = data.target.node_id;
-            var n = level.nodes[idx];
-            var h = 0;
-            var w = 0;
-            var y = 5;
-            // firewall health
-            info_firewall = new PIXI.Text("firewall ".concat(n.firewall),{font:'14px Arial',fill:'#eeeeee'});
-            info_firewall.x = 5;
-            info_firewall.y = y;
-            h += info_firewall.height;
-            if (info_firewall.width > w) w=info_firewall.width;
-            y += h;
-            // node ID
-            info_id = new PIXI.Text("ID ".concat(idx),{font:'14px Arial',fill:'#eeeeee'});
-            info_id.x = 5;
-            info_id.y = y;
-            h += info_id.height;
-            if (info_id.width > w) w=info_id.width;
-            // background
-            var info_back = new PIXI.Graphics();
-            info_back.beginFill(0x111188);
-            info_back.drawRect(5,5,w,h);
-            info_back.endFill();
-            
-            stage.addChild(info_back);
-            stage.addChild(info_firewall)
-            stage.addChild(info_id);
-        }
-        
-        
-        dummy_level = {
-            nodes:{
-                0:[1,50,90],
-                1:[2,100,90],
-                2:[3,150,90]
-            }
-            
-        };
-        
-        
-        function Level () {
-            this.nodes = [];
-        }
-        
-        Level.prototype.constructor = Level;
-        
-        Level.prototype.load = function (data) {
-            //var nodes = data['nodes'];
-            var nodes = data.nodes;
-            console.log(data,nodes);
-            for ( var i in nodes) {
-            //for (var i=0;i<nodes.length;i++) {
-                var n = nodes[i];
-                
-                console.log(n);
-                this.nodes[i] = new Node (n[0],n[1],n[2]);
-                
-            }
-        }
-        
-        function Player () {
-            var name = 'player';
-            //var visible = []; // list of discovered nodes
-            
-        }
-        
-        Player.prototype.constructor = Player;
-        
-        
-        
-        // create stage, renderer
-        var stage = new PIXI.Stage(0x111111,true);
-        var renderer = new PIXI.autoDetectRenderer(640,480);
-        document.body.appendChild(this.renderer.view);
-        
-        // create nodes/level
-        
-        var level = new Level();
-        level.load(dummy_level);
-        console.log(level.nodes);
-        for (var i=0; i < level.nodes.length; i++) {
-            var n = level.nodes[i];
-            //console.log(n);
-            var sp = n.get_sprite(i);
-            //console.log(sp);
-            stage.addChild(sp);
-        }
-        
-        // create player
-        
-        
-        // create viewport - or not...
-        
-        //var viewport = new Viewport(640,480); // ou centre + zoom
-        // var viewport = new Viewport(320,240,1);
-        
-        // 
-        
-        
-        console.log('defining main');
-        
-        function game_loop() {
-            requestAnimFrame(game_loop);
-            // draw nodes
-            
-            // draw texts - info, menu
-            
-            //stage.addChild(sprite);
-            
-            
-            renderer.render(stage);
-        }
-        
-        
-        requestAnimFrame(game_loop);
-        
-        
-        */
-        
-        
     window.onload = function() {
 
         var game = new Phaser.Game(800, 600, Phaser.CANVAS, '', { preload: preload, create: create, update:update });
@@ -545,7 +77,7 @@
         
                 Program
                 
-        ****************************************************************************/
+        **************************************************************************** /
         
         var PRGM_EXTRACTOR;
         var PRGM_RESEARCH
@@ -568,7 +100,7 @@
         
                 Node
         
-        ****************************************************************************/
+        **************************************************************************** /
         
         function Node (i) {
             this.id = i || 0;
@@ -630,10 +162,14 @@
                 this.sprite.addChild(this.anim);
             } /* else {
                 var idle_graphics = this.anim;
-            }*/
+            }* /
             this.anim.rotation = 2 * Math.PI * this.animIdleFrame / 50;
             //25 * Math.cos(2 * Math.PI * this.animIdleFrame / 20)
             this.animIdleFrame = (this.animIdleFrame + 1) % 50;
+            
+        }
+        
+        Node.prototype.runPrograms = function () {
             
         }
         
@@ -672,7 +208,7 @@
         
                 Player
                 
-        **********************************************************************/
+        ********************************************************************** /
         
         function Player(name) {
             this.name = name;
@@ -683,7 +219,7 @@
         
                 Network
         
-        **********************************************************************/
+        ********************************************************************** /
         
         function Grid(m,n) {
             this.data = [];
@@ -877,7 +413,7 @@
                     
                 }
                 
-            }*/
+            }* /
             
             // one node per sector to be home node
         }
@@ -890,6 +426,22 @@
         }
         
         
+        /************************************************************************
+        
+                States
+        
+        ************************************************************************* /
+        
+        var stateMainMenu = {
+            
+            function create() {
+                
+                var menu = game.add.graphics();
+            
+                
+            }
+            
+        };
         
         
         
@@ -938,7 +490,7 @@
             activeNode = null;
             console.log('<--', t.parentNode.id);
         }
-        /* */   
+        /* * /   
             
         
         
@@ -987,13 +539,13 @@
             
             psprite.addChild(panel);
             //psprite.anchor.setTo(0.0, 0.0);
-            console.log('---> ', psprite.x, psprite.y, psprite.width, psprite.height);*/
+            console.log('---> ', psprite.x, psprite.y, psprite.width, psprite.height);* /
             uiGroup.add(spr);
             /*
             var node_graphics = game.add.graphics();
             node_graphics.beginFill(0x4286e9);
             node_graphics.drawCircle(20, 20, 20);
-            node_graphics.endFill();*/
+            node_graphics.endFill();* /
             
             //game.camera.setSize(400, 300);
             zoomGroup = game.add.group();
@@ -1015,7 +567,7 @@
                 //nodes.create(100 + 40 * i, 100, node_graphics);
                 
             }
-            */
+            * /  
             var link = game.add.sprite((45+120)/2, (20+250)/2);
             var link_graphics = game.add.graphics();
             link_graphics.lineStyle(5, 0x278415);
@@ -1074,7 +626,7 @@
                 game.camera.focusOnXY(followx, followy);
             }
         }
-        /* */
+        /* * /
             
         function updateZoomPan() {
             
@@ -1107,7 +659,7 @@
                 game.camera.width = 400;
                 game.camera.height = 300;
                 game.camera.focusOnXY(250,150);
-                */
+                * /
                 //updateScale(250, 150, 2);
                 
             }
@@ -1116,10 +668,10 @@
             /*if (worldScale < 1.5) {
                 worldScale += 0.01;
                 scaled = 0;
-            }*/
+            }* /
             if (scaled == 1 && deltax < 50) {
                 deltax += 1;
-            }   /**/
+            }   /** /
             if (activePanel !== null) {
                 console.log('OK');
             }
@@ -1135,7 +687,7 @@
              2: center camera
              3: adjust camera center if out of bounds
             
-            */
+            * /
             //updateLevelstatus();
         }
             
@@ -1151,7 +703,7 @@
         
         
     };
-        
+        */
         
     </script> <!-- -->
 </html>
