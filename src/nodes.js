@@ -23,11 +23,11 @@ HW.Node.prototype = {
         return (x == this.x && y == this.y);
     },
     getSprite: function() {
-        //console.log('-- ');//, this.x, this.y);
+        console.log('-- ');//, this.x, this.y);
         if (this.sprite == null) {
-            this.sprite = this.game.add.sprite(x, y);
+            this.sprite = this.game.add.sprite(this.x, this.y);
             
-            //console.log('   **');
+            console.log('   **', this.id, this.sprite);
             //nodes[i].addChild(node_graphics);
             
             var node_graphics = this.game.add.graphics();
